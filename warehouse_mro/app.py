@@ -1,9 +1,14 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask, redirect, url_for
 from flask_login import LoginManager
 from config import Config
 from models import db
 from models.user import User
 from routes import register_blueprints
+
+load_dotenv()
 
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
@@ -51,4 +56,8 @@ def index_redirect():
     return redirect(url_for("auth.login"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        host=os.environ.get("FLASK_RUN_HOST", "0.0.0.0"),
+        port=int(os.environ.get("FLASK_RUN_PORT", 5000)),
+        debug=os.environ.get("FLASK_DEBUG", "True") == "True",
+    )
