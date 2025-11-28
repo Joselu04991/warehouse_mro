@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #3c86f5 !important;
+        color: #e8e8e8 !important;
+    }
+    .title-header{
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    .kpi-box {
+        background: #1c1f24;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #2d3035;
+    }
+    .kpi-value{
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #4da3ff;
+    }
+    .kpi-label{
+        font-size: 0.95rem;
+        color: #b5b5b5;
+    }
+    .chart-card{
+        background: #16181b;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #2d3035;
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="title-header">📄 Análisis de Orden de Compra</h2>
+            <p class="text-muted">Sube el Excel de análisis de OC y revisa KPIs y gráficos.</p>
+        </div>
+
+        <form action="{{ url_for('analisis_oc.upload_oc') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+            <input type="file" name="file" class="form-control" accept=".xlsx,.xls" required>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-upload me-1"></i> Subir y analizar
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if resumen and resumen.total_lineas > 0 %}
+
+<!-- ================= KPIs ================= -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.total_lineas }}</div>
+            <div class="kpi-label">Líneas OC</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.total_oc }}</div>
+            <div class="kpi-label">N° OCs</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.total_proveedores }}</div>
+            <div class="kpi-label">Proveedores</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.total_pedido|round(0) }}</div>
+            <div class="kpi-label">Cant. Pedida</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.total_recibido|round(0) }}</div>
+            <div class="kpi-label">Cant. Recibida</div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ resumen.porcentaje_atencion }}%</div>
+            <div class="kpi-label">% Atención</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">📅 Cantidad por Mes</h5>
+            <canvas id="bar_mes_oc"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">🏭 Top Proveedores por Cantidad</h5>
+            <canvas id="bar_proveedor"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">📊 Estado de las Líneas</h5>
+            <canvas id="donut_estado"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">💲 Valor Total Estimado OC</h5>
+            <p class="fs-3 text-success mb-0">
+                {{ resumen.valor_total | round(2) }}
+            </p>
+            <p class="text-muted">*Necesita que exista una columna de "Importe" o "Total" en el Excel.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de muestra -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="chart-card">
+            <h5 class="mb-3">🧾 Vista rápida del Excel</h5>
+            <div class="table-responsive" style="max-height: 400px; overflow-y:auto;">
+                <table class="table table-dark table-sm align-middle">
+                    <thead>
+                        <tr>
+                            {% for col in df.columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for _, row in df.head(50).iterrows() %}
+                        <tr>
+                            {% for col in df.columns %}
+                            <td>{{ row[col] }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="text-muted small mb-0">Mostrando solo las primeras 50 filas.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-info">
+    Sube un archivo Excel de análisis de OC para ver los KPIs y gráficos.
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% if resumen and resumen.total_lineas > 0 %}
+<script>
+    const grafPorMes = {{ graf_por_mes | tojson }};
+    const grafPorProveedor = {{ graf_por_proveedor | tojson }};
+    const grafPorEstado = {{ graf_por_estado | tojson }};
+
+    // === BARRA POR MES ===
+    new Chart(document.getElementById("bar_mes_oc"), {
+        type: "bar",
+        data: {
+            labels: Object.keys(grafPorMes),
+            datasets: [{
+                label: "Cantidad",
+                data: Object.values(grafPorMes),
+                backgroundColor: "#4da3ff"
+            }]
+        }
+    });
+
+    // === TOP PROVEEDORES ===
+    new Chart(document.getElementById("bar_proveedor"), {
+        type: "bar",
+        data: {
+            labels: Object.keys(grafPorProveedor),
+            datasets: [{
+                label: "Cantidad",
+                data: Object.values(grafPorProveedor),
+                backgroundColor: "#00cc66"
+            }]
+        },
+        options: {
+            indexAxis: 'y'
+        }
+    });
+
+    // === ESTADO DE LÍNEAS ===
+    new Chart(document.getElementById("donut_estado"), {
+        type: "doughnut",
+        data: {
+            labels: Object.keys(grafPorEstado),
+            datasets: [{
+                data: Object.values(grafPorEstado),
+                backgroundColor: ["#4da3ff", "#ffcc00", "#ff4d4d", "#888"]
+            }]
+        }
+    });
+</script>
+{% endif %}
+
+{% endblock %}

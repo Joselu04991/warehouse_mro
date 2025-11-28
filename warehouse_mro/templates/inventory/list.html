@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4>Inventario actual</h4>
+        <p class="text-muted mb-0">Ubicaciones ordenadas automáticamente (E001, E002, A01, A02, etc.).</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('inventory.upload_inventory') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-upload me-1"></i>Cargar nuevo inventario
+        </a>
+        <a href="{{ url_for('inventory.count_inventory') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-pencil-square me-1"></i>Conteo en línea
+        </a>
+        <a href="{{ url_for('inventory.discrepancies') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Generar discrepancias (por Excel)
+        </a>
+    </div>
+</div>
+
+
+<div class="card shadow-sm">
+    <div class="card-body table-responsive">
+        <table class="table table-sm table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Código Material</th>
+                    <th>Descripción</th>
+                    <th>Unidad</th>
+                    <th>Ubicación</th>
+                    <th class="text-end">Libre utilización</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.material_code }}</td>
+                        <td>{{ item.material_text }}</td>
+                        <td>{{ item.base_unit }}</td>
+                        <td>{{ item.location }}</td>
+                        <td class="text-end">{{ "%.2f"|format(item.libre_utilizacion) }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No hay inventario cargado.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

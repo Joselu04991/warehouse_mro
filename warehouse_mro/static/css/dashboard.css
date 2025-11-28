@@ -1,0 +1,44 @@
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 10px;
+    padding: 20px;
+}
+
+.block {
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: transform .15s ease;
+    box-shadow: 0px 3px 5px rgba(0,0,0,.2);
+}
+
+.block:hover {
+    transform: scale(1.07);
+}
+
+/* COLORES */
+.block-empty {
+    background: #7d7c7c;
+}
+
+.block-normal {
+    background: #2ecc71;
+}
+
+.block-low {
+    background: #f1c40f;
+}
+
+.block-critical {
+    background: #e74c3c;
+}
+
+@media (max-width: 768px) {
+    .map-grid {
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    }
+}

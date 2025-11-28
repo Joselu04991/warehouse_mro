@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Registrar Error Técnico{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white fw-bold">
+            <i class="bi bi-tools me-2"></i>Registrar Error Técnico
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">Técnico</label>
+                    <input type="text" name="tecnico" class="form-control" required placeholder="Nombre del técnico">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Error</label>
+                    <select name="tipo_error" class="form-select" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option>Instalación Incorrecta</option>
+                        <option>Diagnóstico Incorrecto</option>
+                        <option>Retraso en atención</option>
+                        <option>Mal uso de herramientas</option>
+                        <option>Falla de comunicación</option>
+                        <option>Omisión de procedimiento</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Gravedad</label>
+                    <select name="gravedad" class="form-select" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option>Alta</option>
+                        <option>Media</option>
+                        <option>Baja</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observación</label>
+                    <textarea name="observacion" class="form-control" rows="3"
+                        placeholder="Detalles adicionales..."></textarea>
+                </div>
+
+                <button class="btn btn-danger">💾 Registrar</button>
+                <a href="{{ url_for('technician_errors.list_errors') }}" class="btn btn-secondary">Volver</a>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

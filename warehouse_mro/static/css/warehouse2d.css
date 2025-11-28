@@ -1,0 +1,72 @@
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    padding: 25px;
+    transform-origin: top center;
+}
+
+.block {
+    border-radius: 12px;
+    padding: 18px 10px;
+    text-align: center;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0px 4px 7px rgba(0,0,0,0.25);
+    border: 1px solid rgba(7, 6, 6, 0.15);
+    letter-spacing: .5px;
+}
+
+.block:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.30);
+}
+
+/* COLORES EMPRESARIALES */
+.block-vacio {
+    background: #7e7e7e;
+}
+
+.block-normal {
+    background: #2a9d4f;
+}
+
+.block-bajo {
+    background: #e2b93d;
+    color: #060303;
+}
+
+.block-critico {
+    background: #c0392b;
+}
+
+/* Contadores por estado */
+.counter-box {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+}
+
+.counter-box.normal { background: #2a9d4f; }
+.counter-box.bajo { background: #e2b93d; color: #020101; }
+.counter-box.critico { background: #c0392b; }
+.counter-box.vacio { background: #7e7e7e; }
+
+table td {
+    vertical-align: middle !important;
+}
+
+.modal-header {
+    border-bottom: 2px solid #000;
+}
+
+@media (max-width: 768px) {
+    .map-grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        padding: 15px;
+    }
+}

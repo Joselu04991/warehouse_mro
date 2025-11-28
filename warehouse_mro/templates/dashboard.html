@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #5791e7 !important;
+        color: #0f0707 !important;
+    }
+
+    .kpi-card {
+        background: linear-gradient(135deg, #be0404, #4a319c);
+        border: 1px solid #0a0b0c;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        transition: 0.25s;
+    }
+
+    .kpi-card:hover {
+        transform: scale(1.03);
+        background: linear-gradient(135deg, #be0404, #4a319c);
+    }
+
+    .kpi-value {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #4da3ff;
+    }
+
+    .kpi-label {
+        font-size: 1.1rem;
+        color: #0e0a0a;
+    }
+
+    .chart-card {
+        background: #135ecf;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #08090a;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #100707;
+    }
+</style>
+
+<!-- ========================================= -->
+<!--               TÍTULO PRINCIPAL             -->
+<!-- ========================================= -->
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="dashboard-title">📊 Dashboard Corporativo MRO</h2>
+        <p class="text-muted">Indicadores, KPIs y estado general del almacén</p>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!--                 TARJETAS KPI               -->
+<!-- ========================================= -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-value" id="kpi_stock">0</div>
+            <div class="kpi-label">Materiales en Inventario</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-value text-warning" id="kpi_bultos">0</div>
+            <div class="kpi-label">Bultos Hoy</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-value text-danger" id="kpi_alertas">0</div>
+            <div class="kpi-label">Alertas Activas</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-value text-success" id="kpi_tecnicos">0</div>
+            <div class="kpi-label">Errores Técnicos Hoy</div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ========================================= -->
+<!--        GRÁFICOS CORPORATIVOS GRANDES       -->
+<!-- ========================================= -->
+<div class="row g-4 mb-4">
+
+    <!-- STOCK DONUT -->
+    <div class="col-lg-4">
+        <div class="chart-card shadow-sm">
+            <h5 class="mb-3">📦 Estado del Stock (General)</h5>
+            <canvas id="donut_stock"></canvas>
+        </div>
+    </div>
+
+    <!-- ALERTAS POR DÍA -->
+    <div class="col-lg-8">
+        <div class="chart-card shadow-sm">
+            <h5 class="mb-3">🚨 Alertas por Día</h5>
+            <canvas id="line_alertas"></canvas>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row g-4 mb-4">
+
+    <!-- MAPA DE CALOR BULTOS -->
+    <div class="col-lg-6">
+        <div class="chart-card shadow-sm">
+            <h5 class="mb-3">🔥 Mapa de calor – Bultos por hora</h5>
+            <canvas id="heat_bultos"></canvas>
+        </div>
+    </div>
+
+<!-- ========================================= -->
+<!--            SCRIPTS DE CHART.JS            -->
+<!-- ========================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+/* ============================
+   KPI ANIMATION
+=============================*/
+function animateKPI(id, value) {
+    let el = document.getElementById(id);
+    let start = 0;
+    let end = value;
+    let duration = 1000;
+    let step = (end - start) / (duration / 16);
+
+    function update() {
+        start += step;
+        if (start >= end) {
+            el.innerText = end;
+        } else {
+            el.innerText = Math.floor(start);
+            requestAnimationFrame(update);
+        }
+    }
+    update();
+}
+
+// KPIs REALES
+animateKPI("kpi_stock", {{ total_stock }});
+animateKPI("kpi_bultos", {{ bultos_hoy }});
+animateKPI("kpi_alertas", {{ alertas_activas }});
+animateKPI("kpi_tecnicos", {{ errores_hoy }});
+
+
+/* ============================
+   DONUT STOCK REAL
+=============================*/
+new Chart(document.getElementById("donut_stock"), {
+    type: "doughnut",
+    data: {
+        labels: ["Crítico", "Bajo", "Normal", "Vacío"],
+        datasets: [{
+            data: [{{ criticos }}, {{ bajos }}, {{ normales }}, {{ vacios }}],
+            backgroundColor: ["#ff4d4d", "#ffcc00", "#4dff88", "#666"],
+            borderWidth: 0
+        }]
+    }
+});
+
+
+/* ============================
+   ALERTAS DIARIAS (REAL)
+=============================*/
+new Chart(document.getElementById("line_alertas"), {
+    type: "line",
+    data: {
+        labels: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+        datasets: [{
+            label: "Alertas",
+            data: {{ alertas_dias | tojson }},
+            borderColor: "#ff4d4d",
+            backgroundColor: "rgba(255,77,77,0.2)",
+            tension: 0.3
+        }]
+    }
+});
+
+
+/* ============================
+   HEATMAP BULTOS (REAL)
+=============================*/
+new Chart(document.getElementById("heat_bultos"), {
+    type: "bar",
+    data: {
+        labels: Object.keys({{ horas_bultos | tojson }}),
+        datasets: [{
+            data: Object.values({{ horas_bultos | tojson }}),
+            backgroundColor: Object.values({{ horas_bultos | tojson }}).map(v =>
+                v > 30 ? "#ff4d4d" :
+                v > 20 ? "#ff9900" :
+                v > 10 ? "#ffd633" : "#4dff88"
+            )
+        }]
+    },
+    options: {
+        plugins:{ legend:{display:false}},
+        scales:{ 
+            x:{grid:{display:false}}, 
+            y:{grid:{display:false}}
+        }
+    }
+});
+
+
+</script>
+
+{% endblock %}

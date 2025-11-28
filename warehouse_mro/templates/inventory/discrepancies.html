@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h4>Generar Discrepancias de Inventario</h4>
+        <p class="text-muted mb-0">
+            Cargue el archivo de conteo físico (mismas columnas que el inventario). Se comparará contra el stock del sistema
+            y se generará un Excel con el detalle de diferencias.
+        </p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Archivo Excel de conteo físico</label>
+                <input type="file" name="file" class="form-control" accept=".xlsx,.xls" required>
+                <div class="form-text">
+                    Columnas requeridas:
+                    <code>Código del Material</code>,
+                    <code>Texto breve de material</code>,
+                    <code>Unidad de medida base</code>,
+                    <code>Ubicación</code>,
+                    <code>Libre utilización</code> (representa el stock contado).
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i>Generar archivo de discrepancias
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

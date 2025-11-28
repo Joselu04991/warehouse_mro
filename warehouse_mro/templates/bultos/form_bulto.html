@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Registrar Bultos{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">📦 Registro de Bultos</h2>
+
+        <!-- 🔥 BOTÓN PARA IR AL LISTADO (CORREGIDO) -->
+        <a href="{{ url_for('bultos.list_bultos') }}" class="btn btn-success">
+            📋 Ver Lista de Bultos
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Cantidad de bultos</label>
+                        <input type="number" class="form-control" name="cantidad" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Chofer</label>
+                        <input type="text" class="form-control" name="chofer" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Placa</label>
+                        <input type="text" class="form-control" name="placa" placeholder="ABC-123" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha y hora</label>
+                        <input type="datetime-local" class="form-control" name="fecha_hora" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Observación</label>
+                        <textarea class="form-control" name="observacion" rows="1"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">
+                        ⬅ Volver
+                    </a>
+                    <button class="btn btn-primary">💾 Registrar Bulto</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- FECHA Y HORA AUTOMÁTICA -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.querySelector('input[name="fecha_hora"]').value = now.toISOString().slice(0,16);
+});
+</script>
+
+{% endblock %}

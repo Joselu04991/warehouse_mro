@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #0d0f12 !important;
+        color: #e8e8e8 !important;
+    }
+
+    .title-header{
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .kpi-box {
+        background: #1c1f24;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        border: 1px solid #2d3035;
+    }
+
+    .kpi-value{
+        font-size: 3rem;
+        font-weight: bold;
+        color: #4da3ff;
+    }
+
+    .kpi-label{
+        font-size: 1.1rem;
+        color: #b5b5b5;
+    }
+
+    .chart-card{
+        background: #16181b;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #2d3035;
+    }
+
+    .btn-add {
+        background: #4da3ff;
+        color: white;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 10px 18px;
+        transition: 0.2s;
+    }
+    .btn-add:hover{
+        background: #1f7bd8;
+        color: #fff;
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="title-header">📦 Dashboard de Bultos – MRO</h2>
+        <p class="text-muted">Resumen gráfico de los bultos procesados</p>
+    </div>
+
+    <div class="col text-end">
+        <a href="{{ url_for('bultos.new_bulto') }}" class="btn btn-add">
+            ➕ Registrar Nuevo Bulto
+        </a>
+    </div>
+</div>
+
+<!-- ================= KPIs ================= -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ total_bultos }}</div>
+            <div class="kpi-label">Total Bultos</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ bultos_hoy }}</div>
+            <div class="kpi-label">Bultos Hoy</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ semanas_totales }}</div>
+            <div class="kpi-label">Semanas Procesadas</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-box">
+            <div class="kpi-value">{{ inconsistencias }}</div>
+            <div class="kpi-label">Inconsistencias</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- =============== CHARTS =============== -->
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h5 class="mb-3">🚚 Trailers</h5>
+            <canvas id="donut_trailers"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h5 class="mb-3">📅 Bultos por Día</h5>
+            <canvas id="bar_dias"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">📦 Bultos por Semana</h5>
+            <canvas id="bar_sem"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">📉 Bultos por Mes</h5>
+            <canvas id="bar_mes"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">⚠️ Inconsistencias por Mes</h5>
+            <canvas id="line_incons"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="mb-3">📦 Material Faltante por Mes</h5>
+            <canvas id="bar_faltante"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+new Chart(document.getElementById("donut_trailers"), {
+    type: "doughnut",
+    data: {
+        labels: ["Trailers"],
+        datasets: [{
+            data: [{{ total_trailers }}],
+            backgroundColor: ["#4da3ff"],
+            borderWidth: 0
+        }]
+    }
+});
+
+
+new Chart(document.getElementById("bar_dias"), {
+    type: "bar",
+    data: {
+        labels: {{ dias | tojson }},
+        datasets: [{
+            label: "Bultos",
+            data: {{ bultos_dias | tojson }},
+            backgroundColor: "#4da3ff"
+        }]
+    }
+});
+
+
+new Chart(document.getElementById("bar_sem"), {
+    type: "bar",
+    data: {
+        labels: {{ semanas | tojson }},
+        datasets: [{
+            label: "Bultos por Semana",
+            data: {{ bultos_sem | tojson }},
+            backgroundColor: "#4da3ff"
+        }]
+    }
+});
+
+
+new Chart(document.getElementById("bar_mes"), {
+    type: "bar",
+    data: {
+        labels: {{ meses | tojson }},
+        datasets: [{
+            label: "Bultos por Mes",
+            data: {{ bultos_mes | tojson }},
+            backgroundColor: "#4da3ff"
+        }]
+    }
+});
+
+
+new Chart(document.getElementById("line_incons"), {
+    type: "line",
+    data: {
+        labels: {{ meses | tojson }},
+        datasets: [{
+            label: "Inconsistencias",
+            data: {{ inconsistencias_mes | tojson }},
+            borderColor: "#ff4d4d",
+            backgroundColor: "rgba(255,77,77,0.2)",
+            tension: 0.3
+        }]
+    }
+});
+
+
+new Chart(document.getElementById("bar_faltante"), {
+    type: "bar",
+    data: {
+        labels: {{ meses | tojson }},
+        datasets: [{
+            label: "Material Faltante",
+            data: {{ faltante_mes | tojson }},
+            backgroundColor: "#00cc66"
+        }]
+    }
+});
+
+</script>
+
+{% endblock %}

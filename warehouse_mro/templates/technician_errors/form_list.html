@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="mb-4">Errores Técnicos Registrados</h2>
+
+<a href="{{ url_for('technician_errors.new_error') }}" class="btn btn-success mb-3">➕ Nuevo Error</a>
+<a href="{{ url_for('technician_errors.reporte_pdf') }}" class="btn btn-danger mb-3">📄 Descargar PDF</a>
+
+<hr>
+
+<h4>Ranking Económico – Pérdidas por Técnico</h4>
+<table class="table table-dark table-striped">
+    <thead>
+        <tr>
+            <th>Técnico</th>
+            <th>Dinero Perdido (S/.)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tecnico, monto in ranking.items() %}
+        <tr>
+            <td>{{ tecnico }}</td>
+            <td>S/. {{ "%.2f"|format(monto) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h4>Errores Registrados</h4>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Técnico</th>
+            <th>Error</th>
+            <th>Gravedad</th>
+            <th>Pérdida (S/.)</th>
+            <th>Puntaje Final</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in errores %}
+        <tr>
+            <td>{{ e.fecha_hora.strftime("%Y-%m-%d") }}</td>
+            <td>{{ e.tecnico }}</td>
+            <td>{{ e.tipo_error }}</td>
+            <td>{{ e.gravedad }}</td>
+            <td>S/. {{ "%.2f"|format(e.dinero_perdido) }}</td>
+            <td>{{ e.puntaje }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+
+<h4>Errores por día</h4>
+<canvas id="grafDias" height="100"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ graf_por_dia.keys() | list | safe }};
+    const datos = {{ graf_por_dia.values() | list | safe }};
+
+    new Chart(document.getElementById('grafDias'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Errores por día',
+                data: datos
+            }]
+        }
+    });
+</script>
+
+{% endblock %}

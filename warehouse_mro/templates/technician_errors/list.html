@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Errores Técnicos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="fw-bold mb-4 text-center">📊 Reporte de Errores Técnicos</h3>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{{ url_for('technician_errors.new_error') }}" class="btn btn-dark">➕ Nuevo Error</a>
+        <a href="{{ url_for('technician_errors.reporte_pdf') }}" class="btn btn-danger">📄 Exportar PDF</a>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h5 class="text-center">Errores por Técnico</h5>
+                <canvas id="graf_tecnico"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h5 class="text-center">Pérdida Económica por Día</h5>
+                <canvas id="graf_dias"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Técnico</th>
+                            <th>Tipo</th>
+                            <th>Gravedad</th>
+                            <th>Puntaje</th>
+                            <th>Dinero (S/.)</th>
+                            <th>Fecha</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for e in errores %}
+                        <tr>
+                            <td>{{ e.id }}</td>
+                            <td>{{ e.tecnico }}</td>
+                            <td>{{ e.tipo_error }}</td>
+                            <td>{{ e.gravedad }}</td>
+                            <td>{{ e.impacto }}</td>
+                            <td>S/ {{ e.dinero }}</td>
+                            <td>{{ e.fecha_hora.strftime("%Y-%m-%d %H:%M") }}</td>
+                            <td>{{ e.observacion }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const tecnicosLabels = {{ graf_por_tecnico.keys() | list | safe }};
+const tecnicosData = {{ graf_por_tecnico.values() | list | safe }};
+
+new Chart(document.getElementById('graf_tecnico'), {
+    type: 'bar',
+    data: {
+        labels: tecnicosLabels,
+        datasets: [{
+            label: 'Errores',
+            data: tecnicosData,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        }]
+    }
+});
+
+const diasLabels = {{ graf_por_dia.keys() | list | safe }};
+const diasData = {{ graf_por_dia.values() | list | safe }};
+
+new Chart(document.getElementById('graf_dias'), {
+    type: 'line',
+    data: {
+        labels: diasLabels,
+        datasets: [{
+            label: 'Pérdidas S/.',
+            data: diasData,
+            borderColor: 'red',
+            borderWidth: 2
+        }]
+    }
+});
+</script>
+
+{% endblock %}

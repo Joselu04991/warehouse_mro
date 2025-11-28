@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mb-4">Registrar Error Técnico</h2>
+
+    <form method="POST">
+
+        <label class="form-label">Técnico</label>
+        <input type="text" name="tecnico" class="form-control" required>
+
+        <label class="form-label mt-3">Tipo de Error</label>
+        <select name="tipo_error" class="form-control" required>
+            {% for e in errores_lista %}
+                <option>{{ e }}</option>
+            {% endfor %}
+        </select>
+
+        <label class="form-label mt-3">Gravedad</label>
+        <select name="gravedad" class="form-control" required>
+            <option>Baja</option>
+            <option>Media</option>
+            <option>Alta</option>
+            <option>Crítica</option>
+        </select>
+
+        <label class="form-label mt-3">Impacto Económico (S/.)</label>
+        <input type="number" name="dinero_perdido" step="0.01" class="form-control" required>
+
+        <label class="form-label mt-3">Descripción</label>
+        <textarea name="observacion" class="form-control" required></textarea>
+
+        <button class="btn btn-primary mt-4">Registrar</button>
+    </form>
+</div>
+
+{% endblock %}

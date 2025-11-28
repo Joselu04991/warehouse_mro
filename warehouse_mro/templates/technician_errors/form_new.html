@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="mb-4">Registrar Error Técnico</h3>
+
+    <form method="POST" action="{{ url_for('technician_errors.new_error') }}">
+
+        <div class="mb-3">
+            <label class="form-label">Técnico</label>
+            <input type="text" name="tecnico" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tipo de Error</label>
+            <select name="tipo_error" class="form-control" required>
+                <option value="">Seleccione…</option>
+                <option>Error en codificación</option>
+                <option>Error en registro SAP</option>
+                <option>Error en ubicación de material</option>
+                <option>Error en conteo físico</option>
+                <option>Error en despacho</option>
+                <option>Error administrativo</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Gravedad</label>
+            <select name="gravedad" class="form-control" required>
+                <option value="">Seleccione…</option>
+                <option>Baja</option>
+                <option>Media</option>
+                <option>Alta</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Observación</label>
+            <textarea name="observacion" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ url_for('technician_errors.list_errors') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% endblock %}

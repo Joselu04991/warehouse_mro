@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Subir Layout 2D{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- TÍTULO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">📐 Importar Layout 2D del Almacén</h2>
+
+        <!-- BOTÓN PARA IR AL MAPA -->
+        <a href="{{ url_for('warehouse2d.map_view') }}" class="btn btn-success">
+            🗺️ Ver Mapa 2D
+        </a>
+    </div>
+
+    <!-- TARJETA -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <p class="text-muted mb-4">
+                Seleccione el Excel del layout del almacén.  
+                El sistema generará automáticamente los anaqueles y ubicaciones.
+            </p>
+
+            <!-- FORMULARIO -->
+            <form method="POST" enctype="multipart/form-data">
+
+                <!-- CARGA DE ARCHIVO -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Archivo Excel de Layout 2D</label>
+
+                    <input type="file"
+                           name="file"
+                           class="form-control"
+                           accept=".xlsx,.xls"
+                           required>
+
+                    <div class="form-text mt-1">
+                        El archivo debe contener las columnas:
+                        <code>Código del Material</code>,
+                        <code>Texto breve de material</code>,
+                        <code>Unidad de medida base</code>,
+                        <code>Ubicación</code>,
+                        <code>Stock máximo</code>,
+                        <code>Consumo mes actual</code>,
+                        <code>Libre utilización</code>,
+                        <code>Tamaño de lote mínimo</code>.
+                    </div>
+                </div>
+
+                <!-- BOTÓN ENVIAR -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload me-1"></i> Cargar Layout 2D
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

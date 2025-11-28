@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h4>Importar Inventario</h4>
+        <p class="text-muted mb-0">
+            Cargar archivo de inventario desde Excel. Se validan estrictamente las columnas requeridas.
+        </p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Archivo Excel de inventario</label>
+                <input type="file" name="file" class="form-control" accept=".xlsx,.xls" required>
+                <div class="form-text">
+                    Columnas requeridas (cualquier orden, sin importar mayúsculas/minúsculas):
+                    <code>Código del Material</code>,
+                    <code>Texto breve de material</code>,
+                    <code>Unidad de medida base</code>,
+                    <code>Ubicación</code>,
+                    <code>Libre utilización</code>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-upload me-1"></i>Cargar inventario
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

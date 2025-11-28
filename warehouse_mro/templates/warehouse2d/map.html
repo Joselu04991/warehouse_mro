@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Mapa 2D del Almacén{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/warehouse2d.css') }}">
+
+<div class="container-fluid mt-4">
+    <h2 class="text-center fw-bold mb-2" style="letter-spacing:1px;">
+        🏭 Panel General del Almacén – Vista 2D
+    </h2>
+
+    <p class="text-center text-muted mb-4">
+        Estado general de las ubicaciones según el nivel de stock (Normal, Bajo, Crítico y Vacío).
+    </p>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('warehouse2d.upload_warehouse2d') }}" class="btn btn-dark shadow-sm">
+            📤 Cargar nuevo Excel 2D
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Panel principal: mapa -->
+        <div class="col-lg-9">
+
+            <!-- Buscador -->
+            <div class="row mb-3 justify-content-center">
+                <div class="col-md-6">
+                    <input class="form-control" id="searchBox" placeholder="🔍 Buscar ubicación...">
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="text-center mb-3">
+                <button class="btn btn-outline-secondary me-2" onclick="filterStatus('todos')">Todos</button>
+                <button class="btn btn-outline-success me-2" onclick="filterStatus('normal')">Normal</button>
+                <button class="btn btn-outline-warning me-2" onclick="filterStatus('bajo')">Bajo</button>
+                <button class="btn btn-outline-danger me-2" onclick="filterStatus('crítico')">Crítico</button>
+                <button class="btn btn-outline-dark" onclick="filterStatus('vacío')">Vacío</button>
+            </div>
+
+            <!-- Zoom -->
+            <div class="text-center mb-3">
+                <button class="btn btn-primary me-2" onclick="zoomIn()">🔍+</button>
+                <button class="btn btn-primary" onclick="zoomOut()">🔍−</button>
+            </div>
+
+            <!-- Mapa -->
+            <div id="map-container" class="map-grid"></div>
+        </div>
+
+        <!-- Panel lateral KPIs -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-dark text-white">
+                    Indicadores clave (KPIs)
+                </div>
+                <div class="card-body" id="kpi-panel">
+                    <p class="text-muted mb-1">Cargando KPIs...</p>
+                </div>
+            </div>
+
+            <!-- Contadores por estado -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    Estado de las ubicaciones
+                </div>
+                <div class="card-body" id="counters">
+                    <div class="counter-box normal mb-2">
+                        Normal: <span id="count-normal">0</span>
+                    </div>
+                    <div class="counter-box bajo mb-2">
+                        Bajo: <span id="count-bajo">0</span>
+                    </div>
+                    <div class="counter-box critico mb-2">
+                        Crítico: <span id="count-critico">0</span>
+                    </div>
+                    <div class="counter-box vacio">
+                        Vacío: <span id="count-vacio">0</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalles -->
+<div class="modal fade" id="locationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Detalles de la Ubicación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <h4 id="modal-location" class="fw-bold mb-3"></h4>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Unidad</th>
+                                <th>Seguridad</th>
+                                <th>Máximo</th>
+                                <th>Libre</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="location-details"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/warehouse2d.js') }}"></script>
+{% endblock %}
