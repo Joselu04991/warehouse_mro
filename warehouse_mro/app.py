@@ -65,7 +65,7 @@ def create_app():
         # CREAR TU USUARIO OWNER AQUÍ
         # ============================
         owner_email = "jose.castillo@sider.com.pe"
-        owner_username = "jcasti15"
+        owner_username = "JCASTI15"
         owner_password = "Admin123#"
 
         owner = User.query.filter_by(email=owner_email).first()
@@ -102,4 +102,5 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
+
 
