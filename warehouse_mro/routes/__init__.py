@@ -12,7 +12,7 @@ from .productividad_routes import productividad_bp
 from .qr_routes import qr_bp
 from .auditoria_routes import auditoria_bp
 from .alertas_ai_routes import alertas_ai_bp
-from .admin_roles_routes import roles_bp
+from .admin_roles_routes import admin_roles_bp
 
 def register_blueprints(app):
 
@@ -55,6 +55,7 @@ def register_blueprints(app):
     app.register_blueprint(alertas_ai_bp)
     print("👉 Cargado: alertas_ai")
 
-    app.register_blueprint(roles_bp)
+    app.register_blueprint(admin_roles_bp)
     print("👉 Cargado: roles")
     print("\n========== BLUEPRINTS CARGADOS OK ==========\n")
+
