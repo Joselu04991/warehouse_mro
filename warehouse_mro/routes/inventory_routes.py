@@ -212,7 +212,7 @@ def discrepancies():
                     f"Discrepancia crítica en {r['Código Material']} - {r['Ubicación']}: "
                     f"Sistema={r['Stock sistema']}, Conteo={r['Stock contado']}."
                 )
-                alert = Alert(
+                alert = Alerta(
                     alert_type="discrepancia",
                     message=msg,
                     severity="Alta",
