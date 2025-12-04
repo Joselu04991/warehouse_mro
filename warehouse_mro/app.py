@@ -4,16 +4,13 @@ from config import Config
 from models import db
 from models.user import User
 from routes import register_blueprints
-import os
-
 
 # ==============================
-#  LOGIN MANAGER
+# LOGIN MANAGER
 # ==============================
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.login_message_category = "info"
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,23 +18,17 @@ def load_user(user_id):
 
 
 # ==============================
-#  FACTORÍA CREATE_APP
+# FACTORÍA CREATE_APP
 # ==============================
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # ===== Fix obligatorio para Render =====
-    # Crear carpeta uploads solo si no existe
-    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-    # =======================================
-
     # Inicializar extensiones
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Registrar Blueprints
+    # Registrar blueprints
     register_blueprints(app)
 
     # Registrar filtros
@@ -53,7 +44,7 @@ def create_app():
     def index():
         return redirect(url_for("auth.login"))
 
-    # Crear tablas
+    # Crear tablas y OWNER
     with app.app_context():
         from models.user import User
         from models.inventory import InventoryItem
@@ -69,11 +60,43 @@ def create_app():
         db.create_all()
         print(">>> Tablas creadas.\n")
 
+        # ============================
+        # CREAR TU USUARIO OWNER AQUÍ
+        # ============================
+        owner_email = "jose.castillo@sider.com.pe"
+        owner_username = "jcasti15"
+        owner_password = "Admin123#"
+
+        owner = User.query.filter_by(email=owner_email).first()
+
+        if not owner:
+            print(">>> Creando usuario OWNER...")
+
+            new_owner = User(
+                username=owner_username,
+                email=owner_email,
+                role="owner",
+                status="active",
+                email_confirmed=True,
+            )
+            new_owner.set_password(owner_password)
+
+            db.session.add(new_owner)
+            db.session.commit()
+
+            print(">>> OWNER creado correctamente.")
+        else:
+            # Reforzar que siempre sea OWNER
+            owner.role = "owner"
+            owner.email_confirmed = True
+            db.session.commit()
+            print(">>> OWNER verificado y actualizado.")
+
     return app
 
 
 # ==============================
-#  EJECUTAR SERVIDOR LOCAL
+# EJECUTAR SERVIDOR LOCAL
 # ==============================
 if __name__ == "__main__":
     app = create_app()
