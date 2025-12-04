@@ -4,6 +4,8 @@ from config import Config
 from models import db
 from models.user import User
 from routes import register_blueprints
+import os
+
 
 # ==============================
 #  LOGIN MANAGER
@@ -11,6 +13,7 @@ from routes import register_blueprints
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.login_message_category = "info"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -24,6 +27,12 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # ===== Fix obligatorio para Render =====
+    # Crear carpeta uploads solo si no existe
+    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    # =======================================
+
     # Inicializar extensiones
     db.init_app(app)
     login_manager.init_app(app)
@@ -31,7 +40,7 @@ def create_app():
     # Registrar Blueprints
     register_blueprints(app)
 
-    # Registrar filtros ANTES del return
+    # Registrar filtros
     @app.template_filter("format_fecha")
     def format_fecha(value):
         try:
@@ -64,7 +73,7 @@ def create_app():
 
 
 # ==============================
-#  EJECUTAR SERVIDOR
+#  EJECUTAR SERVIDOR LOCAL
 # ==============================
 if __name__ == "__main__":
     app = create_app()
