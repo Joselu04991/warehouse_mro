@@ -1,10 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Iniciar Sesión{% endblock %}
-
 {% block content %}
-<div class="container mt-5" style="max-width: 450px;">
-    <div class="card shadow p-4">
-        <h3 class="text-center mb-4">🔐 Iniciar Sesión</h3>
+
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow p-4" style="width: 400px;">
+
+        <h3 class="text-center mb-3">
+            <i class="bi bi-box-arrow-in-right text-primary"></i> Iniciar sesión
+        </h3>
 
         <form method="POST">
             <div class="mb-3">
@@ -19,6 +21,12 @@
 
             <button class="btn btn-primary w-100">Ingresar</button>
         </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.register') }}">¿Crear cuenta?</a>
+        </div>
+
     </div>
 </div>
+
 {% endblock %}

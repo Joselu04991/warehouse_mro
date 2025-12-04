@@ -3,11 +3,20 @@
 {% block content %}
 
 <style>
+    /* ======== ESTILOS GENERALES ======== */
     body {
         background: #5791e7 !important;
         color: #0f0707 !important;
     }
 
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #100707;
+        margin-bottom: 10px;
+    }
+
+    /* ======== KPI CARDS ======== */
     .kpi-card {
         background: linear-gradient(135deg, #be0404, #4a319c);
         border: 1px solid #0a0b0c;
@@ -19,7 +28,6 @@
 
     .kpi-card:hover {
         transform: scale(1.03);
-        background: linear-gradient(135deg, #be0404, #4a319c);
     }
 
     .kpi-value {
@@ -33,6 +41,7 @@
         color: #0e0a0a;
     }
 
+    /* ======== CHART CARDS ======== */
     .chart-card {
         background: #94b5e7;
         border-radius: 16px;
@@ -40,26 +49,41 @@
         border: 1px solid #08090a;
     }
 
-    .dashboard-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #100707;
+    /* ======== PRODUCTIVIDADES ======== */
+    .prod-header {
+        background: linear-gradient(135deg, #001d38, #003b71);
+        color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .prod-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px 18px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .prod-table-card {
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 </style>
 
-<!-- ========================================= -->
-<!--               TÍTULO PRINCIPAL             -->
-<!-- ========================================= -->
+<!-- ===================================================== -->
+<!--                   DASHBOARD GENERAL MRO               -->
+<!-- ===================================================== -->
 <div class="row mb-4">
     <div class="col">
-        <h2 class="dashboard-title">📊 Dashboard Corporativo MRO</h2>
-        <p class="text-muted">Indicadores, KPIs y estado general del almacén</p>
+        <h2 class="section-title">📊 Dashboard Corporativo MRO</h2>
+        <p class="text-muted">Indicadores principales del almacén y operaciones</p>
     </div>
 </div>
 
-<!-- ========================================= -->
-<!--                 TARJETAS KPI               -->
-<!-- ========================================= -->
+<!-- ======= KPI CARDS ======= -->
 <div class="row g-4 mb-4">
 
     <div class="col-md-3">
@@ -92,13 +116,9 @@
 
 </div>
 
-
-<!-- ========================================= -->
-<!--        GRÁFICOS CORPORATIVOS GRANDES       -->
-<!-- ========================================= -->
+<!-- ======= GRÁFICOS GENERALES ======= -->
 <div class="row g-4 mb-4">
 
-    <!-- STOCK DONUT -->
     <div class="col-lg-4">
         <div class="chart-card shadow-sm">
             <h5 class="mb-3">📦 Estado del Stock (General)</h5>
@@ -106,7 +126,6 @@
         </div>
     </div>
 
-    <!-- ALERTAS POR DÍA -->
     <div class="col-lg-8">
         <div class="chart-card shadow-sm">
             <h5 class="mb-3">🚨 Alertas por Día</h5>
@@ -119,7 +138,6 @@
 
 <div class="row g-4 mb-4">
 
-    <!-- MAPA DE CALOR BULTOS -->
     <div class="col-lg-6">
         <div class="chart-card shadow-sm">
             <h5 class="mb-3">🔥 Mapa de calor – Bultos por hora</h5>
@@ -127,102 +145,221 @@
         </div>
     </div>
 
-<!-- ========================================= -->
-<!--            SCRIPTS DE CHART.JS            -->
-<!-- ========================================= -->
+</div>
+
+
+
+
+<!-- ===================================================== -->
+<!--           DASHBOARD DE PRODUCTIVIDADES                -->
+<!-- ===================================================== -->
+<div class="prod-header d-flex justify-content-between align-items-center mt-5">
+    <div>
+        <h3><i class="bi bi-graph-up-arrow me-2"></i>Dashboard de Productividades</h3>
+        <small>Seguimiento de desempeño por equipo / área</small>
+    </div>
+    <form method="get" class="d-flex gap-2">
+        <select name="area" class="form-select form-select-sm">
+            <option value="">Todas las áreas</option>
+            {% for a in areas %}
+            <option value="{{ a }}" {% if request.args.get('area') == a %}selected{% endif %}>{{ a }}</option>
+            {% endfor %}
+        </select>
+        <select name="mes" class="form-select form-select-sm">
+            {% for m in meses %}
+            <option value="{{ m.valor }}" {% if request.args.get('mes') == m.valor %}selected{% endif %}>
+                {{ m.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-warning btn-sm" type="submit">
+            <i class="bi bi-funnel"></i>
+        </button>
+    </form>
+</div>
+
+<!-- ======= KPIs PRODUCTIVIDAD ======= -->
+<div class="row mb-3">
+    <div class="col-md-3 mb-2">
+        <div class="prod-card">
+            <small class="text-muted">Disponibilidad promedio</small>
+            <h3 class="mb-0 text-success">{{ disponibilidad_promedio or 0 }}%</h3>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="prod-card">
+            <small class="text-muted">Productividad promedio</small>
+            <h3 class="mb-0">{{ productividad_promedio or 0 }}%</h3>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="prod-card">
+            <small class="text-muted">Equipos con alerta</small>
+            <h3 class="mb-0 text-danger">{{ equipos_alerta or 0 }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="prod-card">
+            <small class="text-muted">MTBF promedio</small>
+            <h3 class="mb-0">{{ mtbf_promedio or 0 }} h</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ======= GRÁFICOS PRODUCTIVIDAD ======= -->
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h6><i class="bi bi-bar-chart-line me-1"></i>Productividad por equipo</h6>
+            <canvas id="prodChart" height="110"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="bi bi-pie-chart me-1"></i>Disponibilidad por estado</h6>
+            <canvas id="estadoChart" height="110"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ======= TABLA DETALLE PRODUCTIVIDAD ======= -->
+<div class="card prod-table-card mt-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Equipo</th>
+                        <th>Área</th>
+                        <th>Prod. %</th>
+                        <th>Disp. %</th>
+                        <th>MTBF (h)</th>
+                        <th>MTTR (h)</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in detalle_equipos %}
+                    <tr>
+                        <td>{{ row.codigo }} - {{ row.descripcion }}</td>
+                        <td>{{ row.area }}</td>
+                        <td>{{ row.productividad }}</td>
+                        <td>{{ row.disponibilidad }}</td>
+                        <td>{{ row.mtbf }}</td>
+                        <td>{{ row.mttr }}</td>
+                        <td>{{ row.estado }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">
+                            No hay datos.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!--                 SCRIPTS DE GRÁFICOS                   -->
+<!-- ===================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
-/* ============================
-   KPI ANIMATION
-=============================*/
-function animateKPI(id, value) {
-    let el = document.getElementById(id);
-    let start = 0;
-    let end = value;
-    let duration = 1000;
-    let step = (end - start) / (duration / 16);
+    /* ================= KPI animation ================= */
+    function animateKPI(id, value) {
+        let el = document.getElementById(id);
+        let start = 0;
+        let end = value;
+        let duration = 1000;
+        let step = (end - start) / (duration / 16);
 
-    function update() {
-        start += step;
-        if (start >= end) {
-            el.innerText = end;
-        } else {
-            el.innerText = Math.floor(start);
-            requestAnimationFrame(update);
+        function update() {
+            start += step;
+            if (start >= end) {
+                el.innerText = end;
+            } else {
+                el.innerText = Math.floor(start);
+                requestAnimationFrame(update);
+            }
         }
+        update();
     }
-    update();
-}
 
-// KPIs REALES
-animateKPI("kpi_stock", {{ total_stock }});
-animateKPI("kpi_bultos", {{ bultos_hoy }});
-animateKPI("kpi_alertas", {{ alertas_activas }});
-animateKPI("kpi_tecnicos", {{ errores_hoy }});
+    animateKPI("kpi_stock", {{ total_stock }});
+    animateKPI("kpi_bultos", {{ bultos_hoy }});
+    animateKPI("kpi_alertas", {{ alertas_activas }});
+    animateKPI("kpi_tecnicos", {{ errores_hoy }});
 
-
-/* ============================
-   DONUT STOCK REAL
-=============================*/
-new Chart(document.getElementById("donut_stock"), {
-    type: "doughnut",
-    data: {
-        labels: ["Crítico", "Bajo", "Normal", "Vacío"],
-        datasets: [{
-            data: [{{ criticos }}, {{ bajos }}, {{ normales }}, {{ vacios }}],
-            backgroundColor: ["#ff4d4d", "#ffcc00", "#4dff88", "#666"],
-            borderWidth: 0
-        }]
-    }
-});
-
-
-/* ============================
-   ALERTAS DIARIAS (REAL)
-=============================*/
-new Chart(document.getElementById("line_alertas"), {
-    type: "line",
-    data: {
-        labels: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
-        datasets: [{
-            label: "Alertas",
-            data: {{ alertas_dias | tojson }},
-            borderColor: "#ff4d4d",
-            backgroundColor: "rgba(255,77,77,0.2)",
-            tension: 0.3
-        }]
-    }
-});
-
-
-/* ============================
-   HEATMAP BULTOS (REAL)
-=============================*/
-new Chart(document.getElementById("heat_bultos"), {
-    type: "bar",
-    data: {
-        labels: Object.keys({{ horas_bultos | tojson }}),
-        datasets: [{
-            data: Object.values({{ horas_bultos | tojson }}),
-            backgroundColor: Object.values({{ horas_bultos | tojson }}).map(v =>
-                v > 30 ? "#ff4d4d" :
-                v > 20 ? "#ff9900" :
-                v > 10 ? "#ffd633" : "#4dff88"
-            )
-        }]
-    },
-    options: {
-        plugins:{ legend:{display:false}},
-        scales:{ 
-            x:{grid:{display:false}}, 
-            y:{grid:{display:false}}
+    /* ================= Stock donut ================= */
+    new Chart(document.getElementById("donut_stock"), {
+        type: "doughnut",
+        data: {
+            labels: ["Crítico", "Bajo", "Normal", "Vacío"],
+            datasets: [{
+                data: [{{ criticos }}, {{ bajos }}, {{ normales }}, {{ vacios }}],
+                backgroundColor: ["#ff4d4d", "#ffcc00", "#4dff88", "#666"],
+                borderWidth: 0
+            }]
         }
-    }
-});
+    });
 
+    /* ================= Alertas por día ================= */
+    new Chart(document.getElementById("line_alertas"), {
+        type: "line",
+        data: {
+            labels: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+            datasets: [{
+                label: "Alertas",
+                data: {{ alertas_dias | tojson }},
+                borderColor: "#ff4d4d",
+                backgroundColor: "rgba(255,77,77,0.2)",
+                tension: 0.3
+            }]
+        }
+    });
+
+    /* ================= Bultos heat map ================= */
+    new Chart(document.getElementById("heat_bultos"), {
+        type: "bar",
+        data: {
+            labels: Object.keys({{ horas_bultos | tojson }}),
+            datasets: [{
+                data: Object.values({{ horas_bultos | tojson }}),
+                backgroundColor: Object.values({{ horas_bultos | tojson }}).map(v =>
+                    v > 30 ? "#ff4d4d" :
+                    v > 20 ? "#ff9900" :
+                    v > 10 ? "#ffd633" : "#4dff88"
+                )
+            }]
+        },
+        options: { plugins:{ legend:{ display:false } } }
+    });
+
+    /* ================= Productividad bar ================= */
+    const prodLabels = {{ prod_labels | tojson }};
+    const prodValues = {{ prod_values | tojson }};
+    new Chart(document.getElementById("prodChart"), {
+        type: "bar",
+        data: {
+            labels: prodLabels,
+            datasets: [{ data: prodValues }]
+        }
+    });
+
+    /* ================= Disponibilidad pie ================= */
+    new Chart(document.getElementById("estadoChart"), {
+        type: "doughnut",
+        data: {
+            labels: {{ estado_labels | tojson }},
+            datasets: [{ data: {{ estado_values | tojson }} }]
+        }
+    });
 
 </script>
 

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    :root {
+        --gerdau-blue: #003b71;
+        --gerdau-dark: #001d38;
+        --gerdau-yellow: #f8c000;
+        --gerdau-grey: #f4f4f4;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--gerdau-dark), var(--gerdau-blue));
+        color: #fff;
+        padding: 20px 25px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .page-header h3 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .filter-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .table thead {
+        background-color: var(--gerdau-blue);
+        color: #fff;
+    }
+
+    .badge-crit-baja {
+        background: #28a745;
+    }
+
+    .badge-crit-media {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .badge-crit-alta {
+        background: #dc3545;
+    }
+
+    .badge-estado-activo {
+        background: #198754;
+    }
+
+    .badge-estado-parado {
+        background: #dc3545;
+    }
+
+    .badge-estado-mtto {
+        background: #0d6efd;
+    }
+
+    .kpi-card {
+        border-radius: 12px;
+        padding: 12px 16px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+</style>
+
+<div class="container-fluid mt-3">
+
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h3><i class="bi bi-gear-wide-connected me-2"></i>Lista de Equipos</h3>
+            <small>Sistema Warehouse MRO – Gestión de equipos productivos</small>
+        </div>
+        <div>
+            <a href="{{ url_for('equipos.nuevo') }}" class="btn btn-warning">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo equipo
+            </a>
+        </div>
+    </div>
+
+    <!-- KPIs rápidos -->
+    <div class="row mb-2">
+        <div class="col-md-3 mb-2">
+            <div class="kpi-card">
+                <small class="text-muted">Total de equipos</small>
+                <h4 class="mb-0">{{ total_equipos or 0 }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="kpi-card">
+                <small class="text-muted">Equipos críticos</small>
+                <h4 class="mb-0 text-danger">{{ equipos_criticos or 0 }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="kpi-card">
+                <small class="text-muted">Disponibilidad promedio</small>
+                <h4 class="mb-0 text-success">{{ disponibilidad_promedio or 0 }}%</h4>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="kpi-card">
+                <small class="text-muted">MTBF promedio</small>
+                <h4 class="mb-0">{{ mtbf_promedio or 0 }} h</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form class="row g-2" method="get">
+            <div class="col-md-3">
+                <label class="form-label mb-1">Buscar por código o descripción</label>
+                <input name="q" type="text" class="form-control" placeholder="Ej: BOMBA-001" value="{{ request.args.get('q','') }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label mb-1">Área</label>
+                <select name="area" class="form-select">
+                    <option value="">Todas</option>
+                    {% for a in areas %}
+                        <option value="{{ a }}" {% if request.args.get('area') == a %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label mb-1">Criticidad</label>
+                <select name="criticidad" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="Baja"  {% if request.args.get('criticidad') == 'Baja'  %}selected{% endif %}>Baja</option>
+                    <option value="Media" {% if request.args.get('criticidad') == 'Media' %}selected{% endif %}>Media</option>
+                    <option value="Alta"  {% if request.args.get('criticidad') == 'Alta'  %}selected{% endif %}>Alta</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label mb-1">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="ACTIVO" {% if request.args.get('estado') == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                    <option value="PARADO" {% if request.args.get('estado') == 'PARADO' %}selected{% endif %}>Parado</option>
+                    <option value="MTTO"   {% if request.args.get('estado') == 'MTTO'   %}selected{% endif %}>En Mantenimiento</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end justify-content-end">
+                <button class="btn btn-primary me-2" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{{ url_for('equipos.lista') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-repeat"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Área</th>
+                            <th>Criticidad</th>
+                            <th>Estado</th>
+                            <th>Prod. %</th>
+                            <th>Último mtto</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eq in equipos %}
+                        <tr>
+                            <td><strong>{{ eq.codigo }}</strong></td>
+                            <td>{{ eq.descripcion }}</td>
+                            <td>{{ eq.area }}</td>
+                            <td>
+                                {% set crit = (eq.criticidad or '').lower() %}
+                                <span class="badge 
+                                    {% if crit == 'baja' %}badge-crit-baja
+                                    {% elif crit == 'media' %}badge-crit-media
+                                    {% elif crit == 'alta' %}badge-crit-alta
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ eq.criticidad or 'N/D' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% set est = (eq.estado or '').upper() %}
+                                <span class="badge 
+                                    {% if est == 'ACTIVO' %}badge-estado-activo
+                                    {% elif est == 'PARADO' %}badge-estado-parado
+                                    {% elif est == 'MTTO' %}badge-estado-mtto
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ eq.estado or 'N/D' }}
+                                </span>
+                            </td>
+                            <td>{{ eq.productividad or 0 }}%</td>
+                            <td>{{ eq.ultimo_mantenimiento or 'N/D' }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('equipos.detalle_equipo', equipo_id=eq.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('equipos.editar_equipo', equipo_id=eq.id) }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('equipos.qr_equipo', equipo_id=eq.id) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-qr-code"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No hay equipos registrados con los filtros actuales.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

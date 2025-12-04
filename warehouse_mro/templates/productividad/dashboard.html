@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">
+        <i class="bi bi-bar-chart-line me-2"></i>
+        Dashboard de Productividad
+    </h2>
+
+    <p class="text-muted">
+        Resumen visual del rendimiento de los equipos del Almacén MRO.
+    </p>
+
+    <div class="row mt-4">
+
+        <!-- GRÁFICO DE PRODUCTIVIDAD -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white fw-bold">
+                    Productividad por Equipo
+                </div>
+                <div class="card-body">
+                    <canvas id="chartProductividad" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO DE ESTADOS -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white fw-bold">
+                    Estados de los Equipos
+                </div>
+                <div class="card-body">
+                    <canvas id="chartEstados" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    // =============================================
+    // PRODUCTIVIDAD
+    // =============================================
+    const prodLabels = {{ prod_labels | tojson }};
+    const prodValues = {{ prod_values | tojson }};
+
+    // Solo genera el gráfico si hay datos reales
+    if (prodLabels.length > 0 && prodValues.length > 0) {
+        new Chart(document.getElementById("chartProductividad"), {
+            type: "bar",
+            data: {
+                labels: prodLabels,
+                datasets: [{
+                    label: "Productividad (%)",
+                    data: prodValues,
+                    backgroundColor: "rgba(13, 110, 253, 0.7)"
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { 
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // =============================================
+    // ESTADOS DE EQUIPO
+    // =============================================
+    const estadoLabels = {{ estado_labels | tojson }};
+    const estadoValues = {{ estado_values | tojson }};
+
+    if (estadoLabels.length > 0 && estadoValues.length > 0) {
+        new Chart(document.getElementById("chartEstados"), {
+            type: "doughnut",
+            data: {
+                labels: estadoLabels,
+                datasets: [{
+                    data: estadoValues,
+                    backgroundColor: [
+                        "#0d6efd",
+                        "#198754",
+                        "#ffc107",
+                        "#dc3545",
+                        "#6c757d"
+                    ]
+                }]
+            }
+        });
+    }
+
+</script>
+
+{% endblock %}
