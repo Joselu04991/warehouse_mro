@@ -58,6 +58,7 @@ def create_app():
 
         print("\n>>> Creando tablas si no existen...")
         db.create_all()
+        db.session.commit()
         print(">>> Tablas creadas.\n")
 
         # ============================
@@ -101,3 +102,4 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
+
