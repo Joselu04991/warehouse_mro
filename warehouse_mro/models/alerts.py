@@ -2,23 +2,33 @@ from models import db
 from datetime import datetime
 
 class Alert(db.Model):
-    __tablename__ = "alerts"
+    __tablename__ = "alertas"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    alert_type = db.Column(db.String(50), nullable=False)  # ejemplo: discrepancia, sistema, seguridad
-    message = db.Column(db.String(500), nullable=False)
-    severity = db.Column(db.String(20), nullable=False, default="Baja")  # Alta / Media / Baja
+    # Tipo de alerta: STOCK / TECNICO / BULTOS / IA / SISTEMA
+    tipo = db.Column(db.String(50), nullable=False)
 
-    created_at = db.Column(db.DateTime, default=datetime.now)
+    # Descripción corta
+    mensaje = db.Column(db.String(255), nullable=False)
 
-    # CAMPO CORRECTO
-    resolved = db.Column(db.Boolean, default=False)
+    # Nivel visual de alerta
+    nivel = db.Column(db.String(20), default="info")   # info, warning, danger, critical
 
-    def resolve(self):
-        """Marca la alerta como resuelta"""
-        self.resolved = True
-        db.session.commit()
+    # Área o módulo que genera la alerta
+    origen = db.Column(db.String(100), default="Sistema")
+
+    # Usuario que la generó (si aplica)
+    usuario = db.Column(db.String(120), nullable=True)
+
+    # Estado
+    estado = db.Column(db.String(20), default="activo")  # activo / cerrado
+
+    # Fecha automática
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Datos adicionales (JSON)
+    detalles = db.Column(db.Text, nullable=True)  # puedes guardar dict -> JSON
 
     def __repr__(self):
-        return f"<Alert {self.alert_type} - {self.severity}>"
+        return f"<Alerta {self.tipo} - {self.mensaje[:20]}>"
