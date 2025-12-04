@@ -1,54 +1,64 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+# routes/admin_roles_routes.py
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models.user import User
 from models import db
 
-roles_bp = Blueprint("roles", __name__, url_prefix="/roles")
+admin_roles_bp = Blueprint("admin_roles", __name__, url_prefix="/roles")
 
 
-@roles_bp.before_request
-def validar_owner():
-    if not current_user.is_authenticated or not current_user.is_owner():
-        flash("No tienes permisos para administrar roles.", "danger")
+# ===========================
+#  VALIDACIÓN: SOLO OWNER
+# ===========================
+def solo_owner():
+    return current_user.is_authenticated and current_user.role == "owner"
+
+
+# ===========================
+#  LISTAR USUARIOS Y ROLES
+# ===========================
+@admin_roles_bp.route("/listar")
+@login_required
+def listar_roles():
+    if not solo_owner():
+        flash("No tienes permiso para gestionar roles.", "danger")
         return redirect(url_for("dashboard.dashboard"))
 
-
-@roles_bp.route("/")
-@login_required
-def listar():
     usuarios = User.query.all()
     return render_template("roles/listar.html", usuarios=usuarios)
 
 
-@roles_bp.route("/cambiar/<int:user_id>", methods=["POST"])
+# ===========================
+#  CAMBIAR ROL DE USUARIO
+# ===========================
+@admin_roles_bp.route("/cambiar/<int:user_id>", methods=["POST"])
 @login_required
 def cambiar_rol(user_id):
+    if not solo_owner():
+        flash("Acceso denegado.", "danger")
+        return redirect(url_for("admin_roles.listar_roles"))
 
-    user = User.query.get_or_404(user_id)
-    nuevo_rol = request.form.get("role")
+    nuevo_rol = request.form.get("rol")
 
-    # Owner NO puede ser degradado
-    if user.is_owner() and user.username != current_user.username:
-        flash("No puedes cambiar el rol del OWNER.", "danger")
-        return redirect(url_for("roles.listar"))
+    # Validar rol
+    if nuevo_rol not in ["owner", "admin", "user"]:
+        flash("Rol inválido.", "warning")
+        return redirect(url_for("admin_roles.listar_roles"))
 
-    # Solo roles permitidos
-    if nuevo_rol not in {"user", "admin", "owner"}:
-        flash("Rol inválido.", "danger")
-        return redirect(url_for("roles.listar"))
+    usuario = User.query.get(user_id)
 
-    # Evitar que haya 0 owners
-    if nuevo_rol != "owner" and user.is_owner() and user.username == current_user.username:
-        flash("Debe existir al menos un OWNER.", "danger")
-        return redirect(url_for("roles.listar"))
+    if not usuario:
+        flash("Usuario no encontrado.", "danger")
+        return redirect(url_for("admin_roles.listar_roles"))
 
-    # Evitar asignar owner a cualquiera
-    if nuevo_rol == "owner" and not current_user.is_owner():
-        flash("Solo el OWNER puede asignar el rol OWNER.", "danger")
-        return redirect(url_for("roles.listar"))
+    # Evitar que el owner se quite su propio rol
+    if usuario.id == current_user.id and nuevo_rol != "owner":
+        flash("No puedes quitarte tu propio rol de OWNER.", "danger")
+        return redirect(url_for("admin_roles.listar_roles"))
 
-    user.role = nuevo_rol
+    # Guardar cambio
+    usuario.role = nuevo_rol
     db.session.commit()
 
-    flash("Rol actualizado correctamente.", "success")
-    return redirect(url_for("roles.listar"))
+    flash(f"Rol actualizado a {nuevo_rol.upper()} correctamente.", "success")
+    return redirect(url_for("admin_roles.listar_roles"))
