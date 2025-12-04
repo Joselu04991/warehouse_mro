@@ -20,6 +20,7 @@ from utils.excel import load_warehouse2d_excel, sort_location_advanced
 warehouse2d_bp = Blueprint("warehouse2d", __name__, url_prefix="/warehouse2d")
 
 
+# Ranking de severidad
 STATUS_RANK = {
     "vacío": 0,
     "normal": 1,
@@ -28,9 +29,18 @@ STATUS_RANK = {
 }
 
 
+# =====================================================================================
+#                            CARGA DEL EXCEL 2D  (ARREGLADO)
+# =====================================================================================
+
 @warehouse2d_bp.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload_warehouse2d():
+
+    # 🔥 Si quieres activar roles, destapa esta línea
+    # if current_user.role != "admin":
+    #     flash("No tienes permiso para subir el layout 2D.", "danger")
+    #     return redirect(url_for("dashboard.dashboard"))
 
     if request.method == "POST":
         file = request.files.get("file")
@@ -44,13 +54,17 @@ def upload_warehouse2d():
         except ValueError as e:
             flash(str(e), "danger")
             return redirect(url_for("warehouse2d.upload_warehouse2d"))
-        except Exception:
+        except Exception as e:
             flash("Error al procesar el archivo 2D. Revise formato y columnas.", "danger")
             return redirect(url_for("warehouse2d.upload_warehouse2d"))
 
+        # 🔥 Limpiamos la tabla antes de cargar nuevo layout
         WarehouseLocation.query.delete()
         db.session.commit()
 
+        # ---------------------------------------------
+        # Insertar datos del Excel
+        # ---------------------------------------------
         for _, row in df.iterrows():
 
             cod = str(row.get("Código del Material", "")).strip()
@@ -74,7 +88,8 @@ def upload_warehouse2d():
 
             db.session.add(item)
 
-            estado = item.status
+            # VERIFICAR ESTADO
+            estado = item.status  # Según modelo
 
             if estado == "crítico":
                 mensaje = (
@@ -82,7 +97,9 @@ def upload_warehouse2d():
                     f"Libre={libre}, Seguridad={seg}"
                 )
                 alerta = Alert(
-                    message=mensaje
+                    alert_type="stock_critico_2d",
+                    message=mensaje,
+                    severity="Alta",
                 )
                 db.session.add(alerta)
 
@@ -94,11 +111,19 @@ def upload_warehouse2d():
     return render_template("warehouse2d/upload.html")
 
 
+# =====================================================================================
+#                                     MAPA 2D
+# =====================================================================================
+
 @warehouse2d_bp.route("/map")
 @login_required
 def map_view():
     return render_template("warehouse2d/map.html")
 
+
+# =====================================================================================
+#                           DATA PARA EL MAPA (JSON)
+# =====================================================================================
 
 @warehouse2d_bp.route("/map-data")
 @login_required
@@ -123,21 +148,28 @@ def map_data():
         por_ubicacion[loc]["total_libre"] += float(item.libre_utilizacion or 0)
         por_ubicacion[loc]["items"] += 1
 
+        # El peor estado domina
         rank = STATUS_RANK.get(estado_item, 0)
         if rank > por_ubicacion[loc]["rank"]:
             por_ubicacion[loc]["rank"] = rank
             por_ubicacion[loc]["status"] = estado_item
 
+    # Ordenar ubicaciones
     data_sorted = sorted(
         por_ubicacion.values(),
         key=lambda x: sort_location_advanced(x["location"])
     )
 
+    # Quitar rank interno
     for d in data_sorted:
         d.pop("rank", None)
 
     return jsonify(data_sorted)
 
+
+# =====================================================================================
+#                       DETALLE DE MATERIALES POR UBICACIÓN
+# =====================================================================================
 
 @warehouse2d_bp.route("/location/<path:ubicacion>")
 @login_required
