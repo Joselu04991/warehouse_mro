@@ -8,3 +8,5 @@ pandas==1.5.3
 python-dotenv==1.0.1
 pyotp==2.9.0
 reportlab==4.1.0
+qrcode==7.4.2
+Pillow==10.2.0
