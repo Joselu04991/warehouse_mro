@@ -1,41 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2 class="mt-4 mb-3">Administración de Roles</h2>
+<div class="container mt-4">
+    <h2>
+        <i class="bi bi-shield-lock-fill me-2"></i>Gestión de Roles
+    </h2>
+    <p class="text-muted">Solo el OWNER puede acceder aquí.</p>
 
-<table class="table table-bordered table-striped text-center">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Usuario</th>
-            <th>Email</th>
-            <th>Rol Actual</th>
-            <th>Nuevo Rol</th>
-        </tr>
-    </thead>
+    <div class="card shadow mt-3">
+        <div class="card-body">
 
-    <tbody>
-        {% for u in usuarios %}
-        <tr>
-            <td>{{ u.id }}</td>
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.role }}</td>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Correo</th>
+                            <th>Rol Actual</th>
+                            <th>Cambiar Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ u.role | upper }}</span>
+                            </td>
+                            <td>
+                                <form method="POST"
+                                      action="{{ url_for('admin_roles.cambiar_rol', user_id=u.id) }}"
+                                      class="d-flex gap-2">
 
-            <td>
-                <form action="{{ url_for('roles.cambiar_rol', user_id=u.id) }}" method="POST">
-                    <select name="role" class="form-select" style="width:140px;">
-                        <option value="user" {% if u.role == "user" %}selected{% endif %}>User</option>
-                        <option value="admin" {% if u.role == "admin" %}selected{% endif %}>Admin</option>
-                        <option value="owner" {% if u.role == "owner" %}selected{% endif %}>Owner</option>
-                    </select>
-                    <button class="btn btn-primary btn-sm mt-2">Cambiar</button>
-                </form>
-            </td>
+                                    <select name="rol" class="form-select form-select-sm">
+                                        <option value="user" {% if u.role=='user' %}selected{% endif %}>USER</option>
+                                        <option value="admin" {% if u.role=='admin' %}selected{% endif %}>ADMIN</option>
+                                        <option value="owner" {% if u.role=='owner' %}selected{% endif %}>OWNER</option>
+                                    </select>
 
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                                    <button class="btn btn-warning btn-sm">
+                                        Cambiar
+                                    </button>
+
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}
