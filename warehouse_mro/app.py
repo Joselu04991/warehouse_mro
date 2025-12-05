@@ -4,7 +4,7 @@ from config import Config
 from models import db
 from models.user import User
 from routes import register_blueprints
-
+import os
 # ==============================
 # LOGIN MANAGER
 # ==============================
@@ -99,8 +99,8 @@ def create_app():
 # ==============================
 # EJECUTAR SERVIDOR LOCAL
 # ==============================
+
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 
