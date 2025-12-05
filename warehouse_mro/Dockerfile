@@ -1,12 +1,20 @@
+# Usa Python oficial
 FROM python:3.11-slim
 
+# Crear carpeta
 WORKDIR /app
 
-COPY warehouse_mro/ ./warehouse_mro/
-COPY requirements.txt ./requirements.txt
+# Copiar requerimientos
+COPY requirements.txt .
 
+# Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8000
+# Copiar todo el proyecto
+COPY . .
 
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "warehouse_mro.app:app"]
+# Exponer puerto (obligatorio para Koyeb)
+EXPOSE 8080
+
+# Ejecutar la app con Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
